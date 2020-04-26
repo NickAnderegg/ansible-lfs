@@ -1,0 +1,12 @@
+[all:vars]
+ansible_python_interpreter=/usr/bin/python3
+
+[build_hosts]
+build_host ansible_connection=ssh ansible_host=127.0.0.1
+
+[chroot]
+image_chroot
+
+[chroot:vars]
+ansible_connection=chroot
+ansible_host=/mnt/lfs
