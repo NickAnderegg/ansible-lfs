@@ -1,0 +1,99 @@
+---
+# Prepare the host system for building the LFS system
+# Reference: http://www.linuxfromscratch.org/lfs/view/stable-systemd/chapter02/hostreqs.html
+
+- name: bootstrap host system
+  hosts: build_hosts
+  tasks:
+    - name: install dependencies required for ansible
+      apt:
+        cache_valid_time: 3600
+        package:
+          - aptitude
+          - parted
+          - python3
+          - python3-apt
+          - python3-dev
+
+- name: prepare host system
+  hosts: build_hosts
+
+  tasks:
+    - name: update apt cache
+      apt:
+        cache_valid_time: 3600
+
+    # All of the packages in Debian's archive meet or exceed the recommended
+    # versions given by LFS. In cases where LFS recommends a maximum version,
+    # the version is pinned to the current version that Debian offers.
+    - name: install build-related packages
+      apt:
+        install_recommends: yes
+        package:
+          # build-essential, covers:
+          # gcc >= 6.2, <= 9.2; build-essential == 8.3
+          # glibc >= 2.11, <= 2.31; build-essential == 2.28
+          # make >= 4.0; build-essential == 4.2
+          - build-essential
+
+          # LFS recommends >= 2.25, <= 2.34
+          - binutils=2.31*
+
+          - bison       # LFS requires >= 2.7; /usr/bin/yacc should be a link to bison
+          - gawk        # LFS requires >= 4.0.1
+          - m4          # LFS requires >= 1.4.10
+
+    - name: install utility packages
+      apt:
+        install_recommends: yes
+        package:
+          - bash        # LFS requires >= 3.2; /bin/sh should be a link to bash
+          - coreutils   # LFS requires >= 6.9
+          - diffutils   # LFS requires >= 2.8.1
+          - findutils   # LFS requires >= 4.2.31
+          - grep        # LFS requires >= 2.5.1a
+          - patch       # LFS requires >= 2.5.4
+          - perl        # LFS requires >= 5.8.8
+          - sed         # LFS requires >= 4.1.5
+          - texinfo     # LFS requires >= 4.7
+
+    - name: install file and compression packages
+      apt:
+        install_recommends: yes
+        package:
+          - bzip2       # LFS requires >= 1.0.4
+          - gzip        # LFS requires >= 1.3.12
+          - tar         # LFS requires >= 1.22
+          - xz-utils    # LFS requires >= 5.0.0
+
+    # LFS requires the development headers for the packages we've installed
+    # so those packages should be installed where applicable.
+    - name: install development header packages
+      apt:
+        install_recommends: yes
+        package:
+          - libgcc-8-dev    # headers for gcc
+          - libc6-dev       # headers for glibc
+          # make            - no header file
+
+          - binutils-dev    # headers for binutils
+          # bash            - no headers file
+          - libbison-dev    # headers for bison
+          - libbz2-dev      # headers for bzip2
+          # coreutils       - no headers file
+          # diffutils       - no headers file
+          # findutils       - no headers file
+          # gawk            - no headers file
+          # grep            - no headers file
+          - libdeflate-dev  # headers for gzip
+          # m4              - no headers file
+          # patch           - no headers file
+          - libperl-dev     # headers for perl
+          # sed             - no headers file
+          - libtar-dev      # headers for tar
+          # texinfo         - no headers file
+          - liblzma-dev     # headers for xz
+
+          # headers for misc. compression packages
+          - libarchive-dev
+          - zlib1g-dev
